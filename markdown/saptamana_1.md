@@ -1,8 +1,11 @@
 Sarcini planificate: 
+
 I. Cercetarea modului de creare a jocurilor.
+
 II. Aplicarea cunostintelor obtinute petnru a crea un GDD (Game Design Document).
 
 Activităţi desfăşurate, observaţii personale:
+
 I.
 
     De obiecei jocurile sunt facute cu scopul de a obtine un profit, sunt fundate
