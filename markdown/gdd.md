@@ -37,7 +37,7 @@ Imaginile folosite nu sunt generate de mine.
 
 ## Level Design (LD)
 
-`Joaca este cu lumea deschisă, jocul este castigat cand jucatorul gaseste un copac cu niste `fructe `secrete`
+`Joaca este cu lumea deschisă, jocul este castigat cand jucatorul gaseste un copac cu niste ` fructe interzise
 
 ## User Interface (UI)
 
