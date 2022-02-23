@@ -1,7 +1,3 @@
-
-[link text](#cuvant)
-<a name="cuvant"></a> 
-
 # `Eden` - Short Game Design Document
 ## Creat de: `Catalin Plesu`
 
@@ -9,7 +5,7 @@
 
 ## Story
 
-`Actiunea are loc într-o pădure masivă. Jucătorul are posibilitatea de a se deplasa liber și a explora ce își dorește.`
+`Actiunea are loc într-o pădure masivă.`
 
 ## Characters
 
@@ -41,7 +37,7 @@ Imaginile folosite nu sunt generate de mine.
 
 ## Level Design (LD)
 
-`Joaca este cu lumea deschisă, neavând nivele, dar există posibilitatea de a genera diverse biome cu diverse plante în el.`
+`Joaca este cu lumea deschisă, jocul este castigat cand jucatorul gaseste un copac cu niste `fructe `secrete`
 
 ## User Interface (UI)
 
