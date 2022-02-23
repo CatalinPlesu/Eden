@@ -42,4 +42,7 @@ I.
     diverse elemente grafice, spre exemplu diagrame uml.
 
 II.
-    Am scris un GDD care poate fi analizat pe [github]()
+    Am scris un GDD care poate fi analizat pe [github](https://github.com/CatalinPlesu/Eden/blob/master/markdown/gdd.md)
+    
+    Acest document contine idea principala a jocului si va fi modificat odata
+    cu formarea unei idei mai clare sau modificarea unor concepte.
