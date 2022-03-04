@@ -69,3 +69,4 @@ fn main() {
         .add_plugin(PrototypeGamePlugin)
         .run();
 }
+
