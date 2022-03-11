@@ -7,3 +7,6 @@ edition = "2021"
 
 [dependencies]
 bevy = { version = "0.6.0", features = ["dynamic"] }
+bevy_rapier3d = "*"
+rand = "0.7.3"
+rapier3d = "*"
