@@ -74,11 +74,11 @@ fn generate_light(
 ) {
     commands.spawn_bundle(PointLightBundle {
         point_light: PointLight {
-            intensity: 1500.0,
+            intensity: 150000000.0,
             shadows_enabled: true,
             ..Default::default()
         },
-        transform: Transform::from_xyz(4.0, 8.0, 4.0),
+        transform: Transform::from_xyz(0.0, 1000000.0, 0.0),
         ..Default::default()
     });
 }
