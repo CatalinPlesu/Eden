@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 bevy = { version = "0.6.0", features = ["dynamic"] }
 bevy_rapier3d = "*"
-rand = "0.7.3"
-rapier3d = "*"
+rapier3d = "0.11"
 bevy_flycam = "*"
+noise = "0.7.0"
+rand = "0.7.3"

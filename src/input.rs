@@ -158,16 +158,3 @@ impl Plugin for PlayerPlugin {
             .add_system(cursor_grab);
     }
 }
-
-/// Same as `PlayerPlugin` but does not spawn a camera
-pub struct NoCameraPlayerPlugin;
-impl Plugin for NoCameraPlayerPlugin {
-    fn build(&self, app: &mut App) {
-        app.init_resource::<InputState>()
-            .init_resource::<MovementSettings>()
-            .add_startup_system(initial_grab_cursor)
-            .add_system(player_move)
-            .add_system(player_look)
-            .add_system(cursor_grab);
-    }
-}
