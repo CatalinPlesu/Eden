@@ -31,6 +31,7 @@ fn main() {
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
         .add_plugin(RapierRenderPlugin)
         .add_plugin(WireframePlugin)
+        .add_plugin(RapierRenderPlugin)
         // .add_plugin(input::PlayerPlugin)
         .add_plugin(FlyCam)
         .add_plugin(LightPlugin)
