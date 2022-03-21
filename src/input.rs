@@ -3,7 +3,7 @@ use bevy::input::mouse::MouseMotion;
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::{
     ColliderBundle, ColliderPositionSync, ColliderShape, Isometry, RigidBodyBundle,
-    RigidBodyPosition,RigidBodyMassPropsFlags,
+    RigidBodyPosition, RigidBodyMassPropsFlags,
 };
 use core::f32::consts::PI;
 

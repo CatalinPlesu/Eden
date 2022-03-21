@@ -12,7 +12,7 @@ use bevy_rapier3d::{
         CoefficientCombineRule, ColliderBundle, ColliderMassProps, ColliderMaterial,
         ColliderPositionSync, ColliderShape, Isometry, NoUserData, Point, RapierPhysicsPlugin,
         Real, RigidBodyBundle, RigidBodyForces, RigidBodyMassProps, RigidBodyPosition,
-        RigidBodyPositionSync, RigidBodyType,
+        RigidBodyPositionSync, RigidBodyType, RigidBodyMassPropsFlags,
     },
     render::RapierRenderPlugin,
 };
@@ -22,7 +22,7 @@ use bevy_flycam::PlayerPlugin as FlyCam;
 use core::f32::consts::PI;
 
 mod input;
-mod terrain;
+mod world;
 
 fn main() {
     App::new()
@@ -35,8 +35,9 @@ fn main() {
         // .add_plugin(input::PlayerPlugin)
         .add_plugin(FlyCam)
         .add_plugin(LightPlugin)
-        .add_plugin(terrain::WorldPlugin)
+        .add_plugin(world::WorldPlugin)
         .add_plugin(CubePlugin)
+        .add_plugin(BallsPlugin)
         .run();
 }
 
@@ -58,6 +59,7 @@ fn generate_cube(
             material: materials.add(Color::rgb(0.9, 0.5, 0.5).into()),
             ..Default::default()
         })
+        .insert(Wireframe)
         .insert_bundle(RigidBodyBundle {
             position: RigidBodyPosition {
                 position: Isometry::new(
@@ -77,6 +79,61 @@ fn generate_cube(
         .insert(ColliderPositionSync::Discrete);
 }
 
+pub struct BallsPlugin;
+impl Plugin for BallsPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_startup_system(generate_balls);
+    }
+}
+
+fn generate_balls(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+    let radius = 0.25;
+
+    for y in (-100..=100).step_by(10) {
+        for x in (-100..=100).step_by(10) {
+            let x01 = (x + 5) as f32 / 10.0;
+            let y01 = (y + 2) as f32 / 4.0;
+            // sphere
+            commands
+                .spawn_bundle(PbrBundle {
+                    mesh: meshes.add(Mesh::from(shape::Icosphere {
+                        radius: radius,
+                        subdivisions: 32,
+                    })),
+                    material: materials.add(StandardMaterial {
+                        base_color: Color::hex("ff9191").unwrap(),
+                        // vary key PBR parameters on a grid of spheres to show the effect
+                        metallic: y01,
+                        perceptual_roughness: x01,
+                        ..Default::default()
+                    }),
+                    ..Default::default()
+                })
+                .insert_bundle(RigidBodyBundle {
+                    position: RigidBodyPosition {
+                        position: Isometry::new(
+                            Vec3::new(x as f32, 5.0, y as f32).into(),
+                            Vec3::new(0., 0., 0.).into(),
+                        ),
+                        ..Default::default()
+                    }
+                    .into(),
+                    ..Default::default()
+                })
+                .insert_bundle(ColliderBundle {
+                    shape: ColliderShape::ball(radius).into(),
+                    ..Default::default()
+                })
+                .insert(Transform::default())
+                .insert(ColliderPositionSync::Discrete);
+        }
+    }
+}
+
 pub struct LightPlugin;
 impl Plugin for LightPlugin {
     fn build(&self, app: &mut App) {
@@ -91,14 +148,14 @@ fn generate_light(
 ) {
     commands.spawn_bundle(PointLightBundle {
         point_light: PointLight {
-            intensity: 500_000.0,
+            intensity: 2900_000.0,
             range: 2000.0,
             shadows_enabled: true,
-            shadow_depth_bias: 10.,
-            shadow_normal_bias: 10.,
+            shadow_depth_bias: 1.,
+            shadow_normal_bias: 1.,
             ..Default::default()
         },
-        transform: Transform::from_xyz(0., 200.0, 0.),
+        transform: Transform::from_xyz(-50., 200.0, -50.),
         ..Default::default()
     });
 }
