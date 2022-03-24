@@ -1,11 +1,15 @@
+// pub mod controller;
+// pub mod input_map;
+// pub mod events;
+// pub mod look;
+// pub mod rapier;
+
+
 use bevy::app::{Events, ManualEventReader};
 use bevy::input::mouse::MouseMotion;
 use bevy::prelude::*;
-use bevy_rapier3d::prelude::{
-    ColliderBundle, ColliderPositionSync, ColliderShape, Isometry, RigidBodyBundle,
-    RigidBodyPosition, RigidBodyMassPropsFlags,
-};
-use core::f32::consts::PI;
+use bevy_rapier3d::prelude::*;
+
 
 /// Keeps track of mouse motion events, pitch, and yaw
 #[derive(Default)]
@@ -52,26 +56,6 @@ fn setup_player(mut commands: Commands) {
             // transform: Transform::from_xyz(-2.0, 5.0, 5.0).looking_at(Vec3::ZERO, Vec3::Y),
             ..Default::default()
         })
-        .insert_bundle(RigidBodyBundle {
-            position: RigidBodyPosition {
-                position: Isometry::new(
-                    Vec3::new(0.0, 8.0, 0.0).into(),
-                    Vec3::new(0., 0., 0.).into(),
-                ),
-                ..Default::default()
-            }
-            .into(),
-            mass_properties: (RigidBodyMassPropsFlags::TRANSLATION_LOCKED
-                | RigidBodyMassPropsFlags::ROTATION_LOCKED_Z)
-                .into(),
-            ..Default::default()
-        })
-        .insert_bundle(ColliderBundle {
-            shape: ColliderShape::ball(0.5).into(),
-            ..Default::default()
-        })
-        .insert(Transform::default())
-        .insert(ColliderPositionSync::Discrete)
         .insert(PlayerCam);
 }
 

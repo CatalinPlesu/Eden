@@ -1,12 +1,11 @@
 use bevy::{
     app::Plugin,
-    pbr::wireframe::{Wireframe, WireframeConfig, WireframePlugin},
+    pbr::wireframe::*,
     prelude::*,
+    render::render_resource::*,
 };
 use bevy_rapier3d::{
-    physics::wrapper::{
-        ColliderMassPropsComponent, ColliderMaterialComponent, RigidBodyMassPropsComponent,
-    },
+    physics::wrapper::*,
     prelude::*,
     render::RapierRenderPlugin,
 };
@@ -20,19 +19,23 @@ use rapier3d::na::ComplexField;
 
 pub fn generate_terrain(
     mut commands: Commands,
+    asset_server: Res<AssetServer>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     let size = 200;
+    let texture_handle = asset_server.load("grass.jpg");
+
     let mesh_collider = create_mesh(size, -1., 5.);
     commands
         .spawn_bundle(PbrBundle {
             mesh: meshes.add(mesh_collider.0),
             material: materials.add(StandardMaterial {
                 // base_color: Color::rgb(0.9, 0.5, 0.5).into(),
-                base_color: Color::rgb(0., 0.5, 0.3).into(),
-                metallic: 1.,
-                perceptual_roughness: 1.0,
+                // base_color: Color::rgb(0., 0.5, 0.3).into(),
+                base_color_texture: Some(texture_handle.clone()),
+                // alpha_mode: AlphaMode::Blend,
+                // unlit: true,
                 ..Default::default()
             }),
             transform: Transform::from_xyz(size as f32 / -2., 0., size as f32 / -2.),

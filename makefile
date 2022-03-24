@@ -1,2 +1,0 @@
-d:
-	cargo run --release

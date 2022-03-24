@@ -21,7 +21,7 @@ use bevy_flycam::PlayerPlugin as FlyCam;
 
 use core::f32::consts::PI;
 
-mod input;
+mod player_controller;
 mod world;
 
 fn main() {
@@ -32,8 +32,8 @@ fn main() {
         .add_plugin(RapierRenderPlugin)
         .add_plugin(WireframePlugin)
         .add_plugin(RapierRenderPlugin)
-        // .add_plugin(input::PlayerPlugin)
-        .add_plugin(FlyCam)
+        .add_plugin(player_controller::PlayerPlugin)
+        // .add_plugin(FlyCam)
         .add_plugin(LightPlugin)
         .add_plugin(world::WorldPlugin)
         .add_plugin(CubePlugin)
@@ -148,14 +148,14 @@ fn generate_light(
 ) {
     commands.spawn_bundle(PointLightBundle {
         point_light: PointLight {
-            intensity: 2900_000.0,
+            intensity: 500_000.0,
             range: 2000.0,
             shadows_enabled: true,
             shadow_depth_bias: 1.,
             shadow_normal_bias: 1.,
             ..Default::default()
         },
-        transform: Transform::from_xyz(-50., 200.0, -50.),
+        transform: Transform::from_xyz(0., 80.0, 0.),
         ..Default::default()
     });
 }
