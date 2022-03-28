@@ -7,8 +7,10 @@ edition = "2021"
 
 [dependencies]
 bevy = { version = "0.6.0", features = ["dynamic"] }
-bevy_rapier3d = { version = "*", features = [ "simd-stable", "render" ] }
-rapier3d = "*"
 bevy_flycam = "*"
+bevy_obj = "^0.6.0"
+bevy_rapier3d = { version = "*", features = [ "simd-stable", "render" ] }
 noise = "0.7.0"
 rand = "0.7.3"
+rapier3d = "*"
+nalgebra = "^0.30.1"

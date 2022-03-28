@@ -1,15 +1,9 @@
-// pub mod controller;
-// pub mod input_map;
-// pub mod events;
-// pub mod look;
-// pub mod rapier;
-
-
 use bevy::app::{Events, ManualEventReader};
 use bevy::input::mouse::MouseMotion;
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 
+// mod input_map;
 
 /// Keeps track of mouse motion events, pitch, and yaw
 #[derive(Default)]
@@ -34,10 +28,6 @@ impl Default for MovementSettings {
     }
 }
 
-/// Used in queries when you want flycams and not other cameras
-#[derive(Component)]
-pub struct PlayerCam;
-
 /// Grabs/ungrabs mouse cursor
 fn toggle_grab_cursor(window: &mut Window) {
     window.set_cursor_lock_mode(!window.cursor_locked());
@@ -53,10 +43,32 @@ fn initial_grab_cursor(mut windows: ResMut<Windows>) {
 fn setup_player(mut commands: Commands) {
     commands
         .spawn_bundle(PerspectiveCameraBundle {
-            // transform: Transform::from_xyz(-2.0, 5.0, 5.0).looking_at(Vec3::ZERO, Vec3::Y),
             ..Default::default()
         })
-        .insert(PlayerCam);
+        .insert_bundle(RigidBodyBundle {
+            position: RigidBodyPosition {
+                position: Isometry::new(
+                    Vec3::new(0., 15., 0.).into(),
+                    Vec3::new(0., 0., 0.).into(),
+                ),
+                ..Default::default()
+            }
+            .into(),
+            mass_properties: RigidBodyMassProps {
+                flags: RigidBodyMassPropsFlags::ROTATION_LOCKED_Y
+                    | RigidBodyMassPropsFlags::ROTATION_LOCKED_Z
+                    | RigidBodyMassPropsFlags::ROTATION_LOCKED_X,
+                ..Default::default()
+            }
+            .into(),
+            ..Default::default()
+        })
+        .insert_bundle(ColliderBundle {
+            shape: ColliderShape::ball(1.).into(),
+            ..Default::default()
+        })
+        .insert(Transform::default())
+        .insert(RigidBodyPositionSync::Discrete);
 }
 
 /// Handles keyboard input and movement
@@ -65,7 +77,7 @@ fn player_move(
     time: Res<Time>,
     windows: Res<Windows>,
     settings: Res<MovementSettings>,
-    mut query: Query<(&PlayerCam, &mut Transform)>,
+    mut query: Query<(&Camera, &mut Transform)>,
 ) {
     let window = windows.get_primary().unwrap();
     for (_camera, mut transform) in query.iter_mut() {
@@ -81,8 +93,8 @@ fn player_move(
                     KeyCode::S => velocity -= forward,
                     KeyCode::A => velocity -= right,
                     KeyCode::D => velocity += right,
-                    KeyCode::Space => velocity += Vec3::Y,
-                    KeyCode::LShift => velocity -= Vec3::Y,
+                    KeyCode::E => velocity += Vec3::Y,
+                    KeyCode::Q => velocity -= Vec3::Y,
                     _ => (),
                 }
             }
@@ -100,10 +112,10 @@ fn player_look(
     windows: Res<Windows>,
     mut state: ResMut<InputState>,
     motion: Res<Events<MouseMotion>>,
-    mut query: Query<(&PlayerCam, &mut Transform)>,
+    mut query: Query<(&Camera, &mut Transform, With<Camera>)>,
 ) {
     let window = windows.get_primary().unwrap();
-    for (_camera, mut transform) in query.iter_mut() {
+    for (_camera, mut transform, _) in query.iter_mut() {
         for ev in state.reader_motion.iter(&motion) {
             if window.cursor_locked() {
                 // Using smallest of height or width ensures equal vertical and horizontal sensitivity

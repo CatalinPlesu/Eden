@@ -24,7 +24,7 @@ pub fn generate_terrain(
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     let size = 200;
-    let texture_handle = asset_server.load("grass.jpg");
+    // let texture_handle = asset_server.load("grass.jpg");
 
     let mesh_collider = create_mesh(size, -1., 5.);
     commands
@@ -32,8 +32,8 @@ pub fn generate_terrain(
             mesh: meshes.add(mesh_collider.0),
             material: materials.add(StandardMaterial {
                 // base_color: Color::rgb(0.9, 0.5, 0.5).into(),
-                // base_color: Color::rgb(0., 0.5, 0.3).into(),
-                base_color_texture: Some(texture_handle.clone()),
+                base_color: Color::rgb(0., 0.5, 0.3).into(),
+                // base_color_texture: Some(texture_handle.clone()),
                 // alpha_mode: AlphaMode::Blend,
                 // unlit: true,
                 ..Default::default()

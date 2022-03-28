@@ -492,6 +492,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "bevy_obj"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3cce4edd0aa94f677eff6120b70eacebfbdbf9507ffa52207b0e30e58b5f6c7a"
+dependencies = [
+ "anyhow",
+ "bevy_app",
+ "bevy_asset",
+ "bevy_render",
+ "bevy_utils",
+ "obj-rs",
+ "thiserror",
+]
+
+[[package]]
 name = "bevy_pbr"
 version = "0.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1302,7 +1317,9 @@ version = "0.1.0"
 dependencies = [
  "bevy",
  "bevy_flycam",
+ "bevy_obj",
  "bevy_rapier3d",
+ "nalgebra 0.30.1",
  "noise",
  "rand 0.7.3",
  "rapier3d 0.11.1",
@@ -2376,6 +2393,15 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
+]
+
+[[package]]
+name = "obj-rs"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c90a2f645433dba5c609451d3fa847282b0f23ee8d8fa75491a946af53cb1db4"
+dependencies = [
+ "num-traits",
 ]
 
 [[package]]
