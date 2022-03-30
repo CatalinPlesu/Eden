@@ -1319,6 +1319,7 @@ dependencies = [
  "bevy_flycam",
  "bevy_obj",
  "bevy_rapier3d",
+ "flagset",
  "nalgebra 0.30.1",
  "noise",
  "rand 0.7.3",
@@ -1391,6 +1392,12 @@ name = "fixedbitset"
 version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "279fb028e20b3c4c320317955b77c5e0c9701f05a1d309905d6fc702cdc5053e"
+
+[[package]]
+name = "flagset"
+version = "0.4.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cda653ca797810c02f7ca4b804b40b8b95ae046eb989d356bce17919a8c25499"
 
 [[package]]
 name = "fnv"

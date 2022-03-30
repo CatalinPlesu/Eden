@@ -24,7 +24,6 @@ pub fn generate_terrain(
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     let size = 200;
-    // let texture_handle = asset_server.load("grass.jpg");
 
     let mesh_collider = create_mesh(size, -1., 5.);
     commands
@@ -33,12 +32,14 @@ pub fn generate_terrain(
             material: materials.add(StandardMaterial {
                 // base_color: Color::rgb(0.9, 0.5, 0.5).into(),
                 base_color: Color::rgb(0., 0.5, 0.3).into(),
-                // base_color_texture: Some(texture_handle.clone()),
+                normal_map_texture: Some(asset_server.load("grass.jpg").clone()),
                 // alpha_mode: AlphaMode::Blend,
                 // unlit: true,
+                metallic: 0.,
+                perceptual_roughness: 1.,
                 ..Default::default()
             }),
-            transform: Transform::from_xyz(size as f32 / -2., 0., size as f32 / -2.),
+            transform: Transform::from_xyz(size as f32 / -2., -10., size as f32 / -2.),
             ..Default::default()
         })
         // .insert(Wireframe)
@@ -49,7 +50,7 @@ pub fn generate_terrain(
         .insert_bundle(ColliderBundle {
             shape: mesh_collider.1.into(),
                 position: Isometry::new(
-                    Vec3::new(0., 0., 0.).into(),
+                    Vec3::new(0., -10., 0.).into(),
                     Vec3::new(0., 0., 0.).into(),
                 ).into(),
             ..Default::default()
@@ -66,7 +67,7 @@ pub fn generate_terrain(
                 ).into(),
             ..Default::default()
         })
-        .insert(ColliderDebugRender::default())
+        .insert(ColliderDebugRender{color: Color::hex("f8b423").unwrap()})
         .insert(ColliderPositionSync::Discrete);
 }
 

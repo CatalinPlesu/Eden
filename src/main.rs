@@ -21,19 +21,30 @@ use bevy_flycam::PlayerPlugin as FlyCam;
 
 use core::f32::consts::PI;
 
-mod player_controller;
+use player::*;
+mod player;
 mod world;
 
 fn main() {
     App::new()
+        .insert_resource(ClearColor(Color::hex("87ceeb").unwrap()))
+        .insert_resource(WindowDescriptor {
+            title: String::from("Eden"),
+            ..Default::default()
+        })
+        .insert_resource(AmbientLight {
+            color: Color::WHITE,
+            brightness: 0.55,
+        })
         .insert_resource(Msaa { samples: 4 })
         .add_plugins(DefaultPlugins)
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
         .add_plugin(RapierRenderPlugin)
         .add_plugin(WireframePlugin)
         .add_plugin(RapierRenderPlugin)
-        .add_plugin(player_controller::PlayerPlugin)
+        // .add_plugin(player::PlayerPlugin)
         // .add_plugin(FlyCam)
+        .add_plugin(PlayerPlugin)
         .add_plugin(LightPlugin)
         .add_plugin(world::WorldPlugin)
         .add_plugin(CubePlugin)
@@ -155,7 +166,7 @@ fn generate_light(
             shadow_normal_bias: 1.,
             ..Default::default()
         },
-        transform: Transform::from_xyz(0., 80.0, 0.),
+        transform: Transform::from_xyz(0., 20.0, 20.),
         ..Default::default()
     });
 }
