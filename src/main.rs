@@ -27,14 +27,9 @@ mod world;
 
 fn main() {
     App::new()
-        .insert_resource(ClearColor(Color::hex("87ceeb").unwrap()))
         .insert_resource(WindowDescriptor {
             title: String::from("Eden"),
             ..Default::default()
-        })
-        .insert_resource(AmbientLight {
-            color: Color::WHITE,
-            brightness: 0.55,
         })
         .insert_resource(Msaa { samples: 4 })
         .add_plugins(DefaultPlugins)
@@ -45,7 +40,6 @@ fn main() {
         // .add_plugin(player::PlayerPlugin)
         // .add_plugin(FlyCam)
         .add_plugin(PlayerPlugin)
-        .add_plugin(LightPlugin)
         .add_plugin(world::WorldPlugin)
         .add_plugin(CubePlugin)
         .add_plugin(BallsPlugin)
@@ -143,30 +137,4 @@ fn generate_balls(
                 .insert(ColliderPositionSync::Discrete);
         }
     }
-}
-
-pub struct LightPlugin;
-impl Plugin for LightPlugin {
-    fn build(&self, app: &mut App) {
-        app.add_startup_system(generate_light);
-    }
-}
-
-fn generate_light(
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
-) {
-    commands.spawn_bundle(PointLightBundle {
-        point_light: PointLight {
-            intensity: 500_000.0,
-            range: 2000.0,
-            shadows_enabled: true,
-            shadow_depth_bias: 1.,
-            shadow_normal_bias: 1.,
-            ..Default::default()
-        },
-        transform: Transform::from_xyz(0., 20.0, 20.),
-        ..Default::default()
-    });
 }

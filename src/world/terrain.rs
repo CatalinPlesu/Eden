@@ -1,21 +1,15 @@
 use bevy::{
-    app::Plugin,
     pbr::wireframe::*,
     prelude::*,
-    render::render_resource::*,
 };
 use bevy_rapier3d::{
-    physics::wrapper::*,
     prelude::*,
-    render::RapierRenderPlugin,
 };
-use rapier3d::prelude::ColliderBuilder;
 // use rapier3d::na::{DMatrix, Matrix, Vector3};
 use nalgebra::Vector3;
 use bevy::render::mesh::*;
 use bevy::render::render_resource::PrimitiveTopology;
 use noise::{utils::NoiseMapBuilder, utils::PlaneMapBuilder, Perlin, Seedable};
-use rapier3d::na::ComplexField;
 
 pub fn generate_terrain(
     mut commands: Commands,
