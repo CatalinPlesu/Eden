@@ -16,7 +16,6 @@ use bevy_rapier3d::{
     },
     render::RapierRenderPlugin,
 };
-use bevy_mod_raycast::*;
 
 use bevy_flycam::PlayerPlugin as FlyCam;
 
@@ -25,7 +24,6 @@ use core::f32::consts::PI;
 use player::*;
 mod player;
 mod world;
-use world::MyRaycastSet;
 
 fn main() {
     App::new()
@@ -36,7 +34,6 @@ fn main() {
         .insert_resource(Msaa { samples: 4 })
         .add_plugins(DefaultPlugins)
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
-        .add_plugin(DefaultRaycastingPlugin::<MyRaycastSet>::default())
         .add_plugin(RapierRenderPlugin)
         .add_plugin(WireframePlugin)
         .add_plugin(RapierRenderPlugin)

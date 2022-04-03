@@ -1,8 +1,8 @@
-use crate::world::MyRaycastSet;
 use bevy::prelude::shape;
 use bevy::prelude::*;
-use bevy_mod_raycast::*;
-use std::f32::consts::FRAC_PI_2;
+use bevy::render::mesh::VertexAttributeValues;
+use bevy_rapier3d::prelude::*;
+use rand::Rng;
 
 pub fn spawn_gltf(
     mut commands: Commands,
@@ -10,7 +10,6 @@ pub fn spawn_gltf(
     mut materials: ResMut<Assets<StandardMaterial>>,
     ass: Res<AssetServer>,
 ) {
-    commands.insert_resource(DefaultPluginState::<MyRaycastSet>::default().with_debug_cursor());
     // note that we have to include the `Scene0` label
     // let tree0 = ass.load("tree0.glb#Scene0");
     // let tree1 = ass.load("tree1.glb#Scene0");
@@ -31,52 +30,66 @@ pub fn spawn_gltf(
     //     .insert(Transform::from_xyz(0., i as f32, 0.));
     // }
 
-    for x in (-100..=100).step_by(10) {
-        for z in (-100..=100).step_by(10) {
+    // for x in (-100..=100).step_by(10) {
+    //     for z in (-100..=100).step_by(10) {
+    //         commands
+    //             .spawn_bundle((
+    //                 Transform::from_xyz(x as f32, -10.0, z as f32),
+    //                 GlobalTransform::identity(),
+    //             ))
+    //             .with_children(|parent| {
+    //                 parent.spawn_scene(ass.load("tree0.glb#Scene0"));
+    //             });
+    //     }
+    // }
+
+    for mesh in meshes.iter() {
+        let mesh = &mesh;
+
+        let vertices: Vec<Vec3> = match mesh.1.attribute(Mesh::ATTRIBUTE_POSITION) {
+            None => panic!("Mesh does not contain vertex positions"),
+            Some(vertex_values) => match &vertex_values {
+                VertexAttributeValues::Float32x3(positions) => positions
+                    .iter()
+                    .map(|coordinates| Vec3::from(*coordinates))
+                    .collect(),
+                _ => panic!("Unexpected vertex types in ATTRIBUTE_POSITION"),
+            },
+        };
+
+        let mut rng = rand::thread_rng();
+        let mut vals: Vec<usize> = (0..500).map(|_| rng.gen_range(0, vertices.len())).collect();
+        vals.sort();
+        vals.dedup();
+        println!("{:?}", vertices);
+        println!("{}", vals.len());
+        println!("{}", vertices.len());
+
+        for i in vals {
+            let p: f64 = rng.gen();
             commands
                 .spawn_bundle((
-                    Transform::from_xyz(x as f32, -10.0, z as f32),
+                    Transform::from_xyz(
+                        vertices[i].x as f32 -100.,
+                        vertices[i].y as f32 - 10.,
+                        vertices[i].z as f32 -100.,
+                        ),
                     GlobalTransform::identity(),
                 ))
                 .with_children(|parent| {
-                    parent.spawn_scene(ass.load("tree0.glb#Scene0"));
+                    if p > 0.80 {
+                        parent.spawn_scene(ass.load("bush0.glb#Scene0"));
+                    } else if p > 0.60 {
+                        parent.spawn_scene(ass.load("bush1.glb#Scene0"));
+                    } else if p > 0.40 {
+                        parent.spawn_scene(ass.load("tree0.glb#Scene0"));
+                    } else {
+                        parent.spawn_scene(ass.load("tree1.glb#Scene0"));
+                    }
                 });
         }
+        break;
     }
-
-    // for x in [-1., 0., 1.] {
-    //     for y in [-1., 0., 1.] {
-    //         for z in [-1., 0., 1.] {
-    //             let collider_set = QueryPipelineColliderComponentsSet(&collider_query);
-
-    //             let ray = Ray::new(
-    //                 Vec3::new(0., 30.0, 0.).into(),
-    //                 Vec3::new(x, y, z).into(),
-    //             );
-    //             let max_toi = 6000.0;
-    //             let solid = true;
-    //             let groups = InteractionGroups::all();
-    //             let filter = None;
-
-    //             if let Some((handle, toi)) =
-    //                 query_pipeline.cast_ray(&collider_set, &ray, max_toi, solid, groups, filter)
-    //             {
-    //                 // The first collider hit has the handle `handle` and it hit after
-    //                 // the ray travelled a distance equal to `ray.dir * toi`.
-    //                 let hit_point = ray.point_at(toi); // Same as: `ray.origin + ray.dir * toi`
-    //                 println!("Entity {:?} hit at point {}, dir {:?}", handle.entity(), hit_point, (x, y, z));
-    //             }
-    //         }
-    //     }
-    // }
-    // commands
-    //     .spawn_bundle((
-    //         Transform::from_xyz(0.0, -10.0, 0.0),
-    //         GlobalTransform::identity(),
-    //     ))
-    //     .with_children(|parent| {
-    //         parent.spawn_scene(tree0);
-    //     });
 
     // commands
     //     .spawn_bundle((
@@ -104,16 +117,4 @@ pub fn spawn_gltf(
     //     .with_children(|parent| {
     //         parent.spawn_scene(bush1);
     //     });
-}
-
-pub fn update_raycast_with_cursor(
-    mut cursor: EventReader<CursorMoved>,
-    mut query: Query<&mut RayCastSource<MyRaycastSet>>,
-) {
-    for mut pick_source in &mut query.iter_mut() {
-        // Grab the most recent cursor event if it exists:
-        if let Some(cursor_latest) = cursor.iter().last() {
-            pick_source.cast_method = RayCastMethod::Screenspace(cursor_latest.position);
-        }
-    }
 }

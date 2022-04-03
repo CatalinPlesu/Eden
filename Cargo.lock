@@ -492,15 +492,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "bevy_mod_raycast"
-version = "0.3.9"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6c39bc6b420c44db8ce8ed6439f7af96b04a6e131beaa106364310091ad2f332"
-dependencies = [
- "bevy",
-]
-
-[[package]]
 name = "bevy_obj"
 version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1326,7 +1317,6 @@ version = "0.1.0"
 dependencies = [
  "bevy",
  "bevy_flycam",
- "bevy_mod_raycast",
  "bevy_obj",
  "bevy_rapier3d",
  "flagset",

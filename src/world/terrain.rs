@@ -5,8 +5,6 @@ use bevy::render::mesh::*;
 use bevy::render::render_resource::PrimitiveTopology;
 use nalgebra::Vector3;
 use noise::{utils::NoiseMapBuilder, utils::PlaneMapBuilder, Perlin, Seedable};
-use bevy_mod_raycast::*;
-use crate::world::MyRaycastSet;
 
 pub fn generate_terrain(
     mut commands: Commands,
@@ -33,7 +31,6 @@ pub fn generate_terrain(
             transform: Transform::from_xyz(size as f32 / -2., -10., size as f32 / -2.),
             ..Default::default()
         })
-        .insert(RayCastMesh::<MyRaycastSet>::default()) // Make this mesh ray cast-able
         // .insert(Wireframe)
         .insert_bundle(RigidBodyBundle {
             body_type: RigidBodyType::Static.into(),
