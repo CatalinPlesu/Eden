@@ -1,15 +1,12 @@
-use bevy::{
-    pbr::wireframe::*,
-    prelude::*,
-};
-use bevy_rapier3d::{
-    prelude::*,
-};
+use bevy::{pbr::wireframe::*, prelude::*};
+use bevy_rapier3d::prelude::*;
 // use rapier3d::na::{DMatrix, Matrix, Vector3};
-use nalgebra::Vector3;
 use bevy::render::mesh::*;
 use bevy::render::render_resource::PrimitiveTopology;
+use nalgebra::Vector3;
 use noise::{utils::NoiseMapBuilder, utils::PlaneMapBuilder, Perlin, Seedable};
+use bevy_mod_raycast::*;
+use crate::world::MyRaycastSet;
 
 pub fn generate_terrain(
     mut commands: Commands,
@@ -36,6 +33,7 @@ pub fn generate_terrain(
             transform: Transform::from_xyz(size as f32 / -2., -10., size as f32 / -2.),
             ..Default::default()
         })
+        .insert(RayCastMesh::<MyRaycastSet>::default()) // Make this mesh ray cast-able
         // .insert(Wireframe)
         .insert_bundle(RigidBodyBundle {
             body_type: RigidBodyType::Static.into(),
@@ -43,25 +41,25 @@ pub fn generate_terrain(
         })
         .insert_bundle(ColliderBundle {
             shape: mesh_collider.1.into(),
-                position: Isometry::new(
-                    Vec3::new(0., -10., 0.).into(),
-                    Vec3::new(0., 0., 0.).into(),
-                ).into(),
+            position: Isometry::new(Vec3::new(0., -10., 0.).into(), Vec3::new(0., 0., 0.).into())
+                .into(),
             ..Default::default()
         });
-        
 
-        //no infinite fall
+    //no infinite fall
     commands
         .spawn_bundle(ColliderBundle {
-            shape: ColliderShape::cuboid(1000.,0.001,1000.).into(),
-                position: Isometry::new(
-                    Vec3::new(-500., -20., -500.).into(),
-                    Vec3::new(0., 0., 0.).into(),
-                ).into(),
+            shape: ColliderShape::cuboid(1000., 0.001, 1000.).into(),
+            position: Isometry::new(
+                Vec3::new(-500., -50., -500.).into(),
+                Vec3::new(0., 0., 0.).into(),
+            )
+            .into(),
             ..Default::default()
         })
-        .insert(ColliderDebugRender{color: Color::hex("f8b423").unwrap()})
+        .insert(ColliderDebugRender {
+            color: Color::hex("f8b423").unwrap(),
+        })
         .insert(ColliderPositionSync::Discrete);
 }
 
@@ -79,7 +77,7 @@ fn create_mesh(n: u32, min: f64, max: f64) -> (Mesh, ColliderShape) {
     let mut normals = Vec::new();
     let mut uvs = Vec::new();
 
-    let ground_size: Vector3<Real> = Vector3::<Real>::new((n+1) as f32, 1., (n+1) as f32);
+    let ground_size: Vector3<Real> = Vector3::<Real>::new((n + 1) as f32, 1., (n + 1) as f32);
 
     let mut heights = DMatrix::<Real>::from_element((n + 1) as usize, (n + 1) as usize, 0.);
     // generate vertices
@@ -89,7 +87,7 @@ fn create_mesh(n: u32, min: f64, max: f64) -> (Mesh, ColliderShape) {
             positions.push([x as f32, y, z as f32]);
             normals.push([0., 1.0, 0.]);
             uvs.push([1., 1.]);
-            heights[( z as usize, x as usize )] = y;
+            heights[(z as usize, x as usize)] = y;
         }
     }
 
