@@ -42,7 +42,7 @@ fn main() {
         .add_plugin(PlayerPlugin)
         .add_plugin(world::WorldPlugin)
         .add_plugin(CubePlugin)
-        // .add_plugin(BallsPlugin)
+        .add_plugin(BallsPlugin)
         .run();
 }
 
@@ -96,10 +96,10 @@ fn generate_balls(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    let radius = 0.25;
+    let radius = 1.25;
 
-    for y in (-100..=100).step_by(10) {
-        for x in (-100..=100).step_by(10) {
+    for y in (-100..=100).step_by(20) {
+        for x in (-100..=100).step_by(20) {
             let x01 = (x + 5) as f32 / 10.0;
             let y01 = (y + 2) as f32 / 4.0;
             // sphere
