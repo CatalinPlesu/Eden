@@ -1,6 +1,7 @@
 use bevy::{pbr::wireframe::*, prelude::*};
 use bevy_rapier3d::prelude::*;
 // use rapier3d::na::{DMatrix, Matrix, Vector3};
+use crate::*;
 use bevy::prelude::shape;
 use bevy::render::mesh::VertexAttributeValues;
 use bevy::render::mesh::*;
@@ -15,10 +16,11 @@ pub fn generate_terrain(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     ass: Res<AssetServer>,
+    map_settings: Res<MapSettings>,
 ) {
-    let size = 200;
+    let size = map_settings.size.clone();
 
-    let mesh_collider = create_mesh(size, -1., 5.);
+    let mesh_collider = create_mesh(size as u32, -1., 5.);
 
     let vertices: Vec<Vec3> = match mesh_collider.0.attribute(Mesh::ATTRIBUTE_POSITION) {
         None => panic!("Mesh does not contain vertex positions"),
@@ -31,7 +33,9 @@ pub fn generate_terrain(
         },
     };
     let mut rng = rand::thread_rng();
-    let mut vals: Vec<usize> = (0..200).map(|_| rng.gen_range(0, vertices.len())).collect();
+    let mut vals: Vec<usize> = (0..map_settings.plants)
+        .map(|_| rng.gen_range(0, vertices.len()))
+        .collect();
     vals.sort();
     vals.dedup();
 
@@ -40,9 +44,9 @@ pub fn generate_terrain(
         commands
             .spawn_bundle((
                 Transform::from_xyz(
-                    vertices[i].x as f32 - 100.,
-                    vertices[i].y as f32 - 10.,
-                    vertices[i].z as f32 - 100.,
+                    vertices[i].x as f32 - size / 2.,
+                    vertices[i].y as f32,
+                    vertices[i].z as f32 - size / 2.,
                 ),
                 GlobalTransform::identity(),
             ))
@@ -50,9 +54,9 @@ pub fn generate_terrain(
                 position: RigidBodyPosition {
                     position: Isometry::new(
                         Vec3::new(
-                            vertices[i].x as f32 - 100.,
-                            vertices[i].y as f32 - 10.,
-                            vertices[i].z as f32 - 100.,
+                            vertices[i].x as f32 - size / 2.,
+                            vertices[i].y as f32,
+                            vertices[i].z as f32 - size / 2.,
                         )
                         .into(),
                         Vec3::new(0., 0., 0.).into(),
@@ -64,6 +68,10 @@ pub fn generate_terrain(
             })
             .insert_bundle(ColliderBundle {
                 shape: ColliderShape::cuboid(0.3, 2., 0.3).into(),
+                flags: ColliderFlags {
+                    collision_groups: InteractionGroups::all(),
+                    ..ColliderFlags::default()
+                }.into(),
                 ..Default::default()
             })
             .with_children(|parent| {
@@ -92,7 +100,7 @@ pub fn generate_terrain(
                 perceptual_roughness: 1.,
                 ..Default::default()
             }),
-            transform: Transform::from_xyz(size as f32 / -2., -10., size as f32 / -2.),
+            transform: Transform::from_xyz(-size / 2., 0., -size / 2.),
             ..Default::default()
         })
         // .insert(Wireframe)
@@ -102,26 +110,26 @@ pub fn generate_terrain(
         })
         .insert_bundle(ColliderBundle {
             shape: mesh_collider.1.into(),
-            position: Isometry::new(Vec3::new(0., -10., 0.).into(), Vec3::new(0., 0., 0.).into())
+            position: Isometry::new(Vec3::new(0., 0., 0.).into(), Vec3::new(0., 0., 0.).into())
                 .into(),
             ..Default::default()
         });
 
-    //no infinite fall
-    commands
-        .spawn_bundle(ColliderBundle {
-            shape: ColliderShape::cuboid(1000., 0.001, 1000.).into(),
-            position: Isometry::new(
-                Vec3::new(-500., -50., -500.).into(),
-                Vec3::new(0., 0., 0.).into(),
-            )
-            .into(),
-            ..Default::default()
-        })
-        .insert(ColliderDebugRender {
-            color: Color::hex("f8b423").unwrap(),
-        })
-        .insert(ColliderPositionSync::Discrete);
+    ////no infinite fall
+    //commands
+    //    .spawn_bundle(ColliderBundle {
+    //        shape: ColliderShape::cuboid(1000., 0.001, 1000.).into(),
+    //        position: Isometry::new(
+    //            Vec3::new(-500., -50., -500.).into(),
+    //            Vec3::new(0., 0., 0.).into(),
+    //        )
+    //        .into(),
+    //        ..Default::default()
+    //    })
+    //    .insert(ColliderDebugRender {
+    //        color: Color::hex("f8b423").unwrap(),
+    //    })
+    //    .insert(ColliderPositionSync::Discrete);
 }
 
 fn create_mesh(n: u32, min: f64, max: f64) -> (Mesh, ColliderShape) {
@@ -182,43 +190,3 @@ fn create_mesh(n: u32, min: f64, max: f64) -> (Mesh, ColliderShape) {
     mesh.set_attribute(Mesh::ATTRIBUTE_UV_0, uvs);
     (mesh, collider_shape)
 }
-
-// pub fn spawn_gltf(
-//     n: usize,
-//     str: &str,
-//     mut commands: Commands,
-//     mut materials: ResMut<Assets<StandardMaterial>>,
-//     ass: Res<AssetServer>,
-// ) {
-//     let mut rng = rand::thread_rng();
-//     let mut vals: Vec<usize> = (0..500).map(|_| rng.gen_range(0, vertices.len())).collect();
-//     vals.sort();
-//     vals.dedup();
-//     println!("{:?}", vertices);
-//     println!("{}", vals.len());
-//     println!("{}", vertices.len());
-
-//     for i in vals {
-//         let p: f64 = rng.gen();
-//         commands
-//             .spawn_bundle((
-//                 Transform::from_xyz(
-//                     vertices[i].x as f32 - 100.,
-//                     vertices[i].y as f32 - 10.,
-//                     vertices[i].z as f32 - 100.,
-//                 ),
-//                 GlobalTransform::identity(),
-//             ))
-//             .with_children(|parent| {
-//                 if p > 0.80 {
-//                     parent.spawn_scene(ass.load("bush0.glb#Scene0"));
-//                 } else if p > 0.60 {
-//                     parent.spawn_scene(ass.load("bush1.glb#Scene0"));
-//                 } else if p > 0.40 {
-//                     parent.spawn_scene(ass.load("tree0.glb#Scene0"));
-//                 } else {
-//                     parent.spawn_scene(ass.load("tree1.glb#Scene0"));
-//                 }
-//             });
-//     }
-// }

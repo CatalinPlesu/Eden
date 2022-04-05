@@ -75,7 +75,7 @@ impl Default for PlayerController {
             sprint: false,
             fly_speed: 10.0,
             fast_fly_speed: 30.0,
-            gravity: 10.0,
+            gravity: 23.0,
             walk_speed: 10.0,
             run_speed: 30.0,
             fwd_speed: 60.0,

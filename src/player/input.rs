@@ -55,9 +55,7 @@ pub fn player_input_system(
         if keyboard_input.pressed(input_map.key_left) {
             player_input.movement.x -= 1.;
         }
-        if keyboard_input.pressed(input_map.key_jump) {
-            player_input.movement.y += 1.;
-        }
+
         if player_input.fly {
             if keyboard_input.pressed(input_map.key_up) {
                 player_input.movement.y += 1.;

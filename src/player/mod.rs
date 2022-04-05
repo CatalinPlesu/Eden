@@ -45,14 +45,14 @@ pub fn setup_system(
 
     commands.spawn()
         .insert_bundle(ColliderBundle {
-            shape: ColliderShape::capsule(Point3::new(0.0, 0.5, 0.0), Point3::new(0.0, 1.5, 0.0), 0.5).into(),
+            shape: ColliderShape::capsule(Point3::new(0.0, 0., 0.0), Point3::new(0.0, 1.5, 0.0), 0.5).into(),
             collider_type: ColliderType::Solid.into(),
             ..Default::default()
         })
         .insert(ColliderDebugRender::with_id(0))
         .insert_bundle(RigidBodyBundle {
             body_type: RigidBodyType::Dynamic.into(),
-            position: Vec3::new(4.0, 24.0, 4.0).into(),
+            position: Vec3::new(0., 10., 0.).into(),
             activation: RigidBodyActivation::cannot_sleep().into(),
             mass_properties: RigidBodyMassPropsFlags::ROTATION_LOCKED.into(),
             ccd: RigidBodyCcd { ccd_enabled: true, ..Default::default() }.into(),

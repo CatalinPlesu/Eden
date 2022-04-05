@@ -11,8 +11,8 @@ use bevy_rapier3d::{
     prelude::{
         CoefficientCombineRule, ColliderBundle, ColliderMassProps, ColliderMaterial,
         ColliderPositionSync, ColliderShape, Isometry, NoUserData, Point, RapierPhysicsPlugin,
-        Real, RigidBodyBundle, RigidBodyForces, RigidBodyMassProps, RigidBodyPosition,
-        RigidBodyPositionSync, RigidBodyType, RigidBodyMassPropsFlags,
+        Real, RigidBodyBundle, RigidBodyForces, RigidBodyMassProps, RigidBodyMassPropsFlags,
+        RigidBodyPosition, RigidBodyPositionSync, RigidBodyType,
     },
     render::RapierRenderPlugin,
 };
@@ -25,6 +25,20 @@ use player::*;
 mod player;
 mod world;
 
+pub struct MapSettings {
+    size: f32,
+    plants: u32,
+}
+
+impl Default for MapSettings {
+    fn default() -> Self {
+        Self {
+            size: 200.,
+            plants: 200,
+        }
+    }
+}
+
 fn main() {
     App::new()
         .insert_resource(WindowDescriptor {
@@ -32,6 +46,7 @@ fn main() {
             ..Default::default()
         })
         .insert_resource(Msaa { samples: 4 })
+        .insert_resource(MapSettings::default())
         .add_plugins(DefaultPlugins)
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
         .add_plugin(RapierRenderPlugin)
