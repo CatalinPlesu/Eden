@@ -41,6 +41,7 @@ pub fn generate_terrain(
 
     for i in vals {
         let p: f64 = rng.gen();
+        if map_settings.plants_colider {
         commands
             .spawn_bundle((
                 Transform::from_xyz(
@@ -85,6 +86,29 @@ pub fn generate_terrain(
                     parent.spawn_scene(ass.load("tree1.glb#Scene0"));
                 }
             });
+        }
+        else {
+        commands
+            .spawn_bundle((
+                Transform::from_xyz(
+                    vertices[i].x as f32 - size / 2.,
+                    vertices[i].y as f32,
+                    vertices[i].z as f32 - size / 2.,
+                ),
+                GlobalTransform::identity(),
+            ))
+            .with_children(|parent| {
+                if p > 0.80 {
+                    parent.spawn_scene(ass.load("bush0.glb#Scene0"));
+                } else if p > 0.60 {
+                    parent.spawn_scene(ass.load("bush1.glb#Scene0"));
+                } else if p > 0.40 {
+                    parent.spawn_scene(ass.load("tree0.glb#Scene0"));
+                } else {
+                    parent.spawn_scene(ass.load("tree1.glb#Scene0"));
+                }
+            });
+        }
     }
 
     commands

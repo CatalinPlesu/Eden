@@ -28,13 +28,15 @@ mod world;
 pub struct MapSettings {
     size: f32,
     plants: u32,
+    plants_colider: bool,
 }
 
 impl Default for MapSettings {
     fn default() -> Self {
         Self {
             size: 200.,
-            plants: 200,
+            plants: 500,
+            plants_colider: true,
         }
     }
 }
