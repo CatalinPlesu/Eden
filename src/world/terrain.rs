@@ -46,7 +46,7 @@ pub fn generate_terrain(
                 .spawn_bundle((
                     Transform::from_xyz(
                         vertices[i].x as f32 - size / 2.,
-                        vertices[i].y as f32,
+                        vertices[i].y as f32 - 0.1,
                         vertices[i].z as f32 - size / 2.,
                     ),
                     GlobalTransform::identity(),
@@ -56,7 +56,7 @@ pub fn generate_terrain(
                         position: Isometry::new(
                             Vec3::new(
                                 vertices[i].x as f32 - size / 2.,
-                                vertices[i].y as f32,
+                                vertices[i].y as f32 - 0.1,
                                 vertices[i].z as f32 - size / 2.,
                             )
                             .into(),

@@ -58,8 +58,8 @@ fn main() {
         // .add_plugin(FlyCam)
         .add_plugin(PlayerPlugin)
         .add_plugin(world::WorldPlugin)
-        .add_plugin(CubePlugin)
-        .add_plugin(BallsPlugin)
+        // .add_plugin(CubePlugin)
+        // .add_plugin(BallsPlugin)
         .run();
 }
 
