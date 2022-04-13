@@ -200,7 +200,8 @@ pub fn player_move_system(
 
 //                 wish_speed = f32::min(wish_speed, max_speed);
 
-//                 if let Some(ground_hit) = ground_hit {
+//                 // if let Some(ground_hit) = ground_hit {
+//                 if false {
 //                     // Only apply friction after at least one tick, allows b-hopping without losing speed
 //                     if controller.ground_tick >= 1 {
 //                         if lateral_speed > controller.friction_cutoff {

@@ -113,7 +113,7 @@ fn generate_balls(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    let radius = 1.25;
+    let radius = 0.15;
 
     for y in (-100..=100).step_by(20) {
         for x in (-100..=100).step_by(20) {
@@ -127,10 +127,11 @@ fn generate_balls(
                         subdivisions: 32,
                     })),
                     material: materials.add(StandardMaterial {
-                        base_color: Color::hex("ff9191").unwrap(),
+                        base_color: Color::hex("FBCEB1").unwrap(),
+                        // base_color: Color::hex("ff9191").unwrap(),
                         // vary key PBR parameters on a grid of spheres to show the effect
-                        metallic: y01,
-                        perceptual_roughness: x01,
+                        // metallic: y01,
+                        // perceptual_roughness: x01,
                         ..Default::default()
                     }),
                     ..Default::default()

@@ -42,72 +42,72 @@ pub fn generate_terrain(
     for i in vals {
         let p: f64 = rng.gen();
         if map_settings.plants_colider {
-        commands
-            .spawn_bundle((
-                Transform::from_xyz(
-                    vertices[i].x as f32 - size / 2.,
-                    vertices[i].y as f32,
-                    vertices[i].z as f32 - size / 2.,
-                ),
-                GlobalTransform::identity(),
-            ))
-            .insert_bundle(RigidBodyBundle {
-                position: RigidBodyPosition {
-                    position: Isometry::new(
-                        Vec3::new(
-                            vertices[i].x as f32 - size / 2.,
-                            vertices[i].y as f32,
-                            vertices[i].z as f32 - size / 2.,
-                        )
-                        .into(),
-                        Vec3::new(0., 0., 0.).into(),
+            commands
+                .spawn_bundle((
+                    Transform::from_xyz(
+                        vertices[i].x as f32 - size / 2.,
+                        vertices[i].y as f32,
+                        vertices[i].z as f32 - size / 2.,
                     ),
+                    GlobalTransform::identity(),
+                ))
+                .insert_bundle(RigidBodyBundle {
+                    position: RigidBodyPosition {
+                        position: Isometry::new(
+                            Vec3::new(
+                                vertices[i].x as f32 - size / 2.,
+                                vertices[i].y as f32,
+                                vertices[i].z as f32 - size / 2.,
+                            )
+                            .into(),
+                            Vec3::new(0., 0., 0.).into(),
+                        ),
+                        ..Default::default()
+                    }
+                    .into(),
                     ..Default::default()
-                }
-                .into(),
-                ..Default::default()
-            })
-            .insert_bundle(ColliderBundle {
-                shape: ColliderShape::cuboid(0.3, 2., 0.3).into(),
-                flags: ColliderFlags {
-                    collision_groups: InteractionGroups::all(),
-                    ..ColliderFlags::default()
-                }.into(),
-                ..Default::default()
-            })
-            .with_children(|parent| {
-                if p > 0.80 {
-                    parent.spawn_scene(ass.load("bush0.glb#Scene0"));
-                } else if p > 0.60 {
-                    parent.spawn_scene(ass.load("bush1.glb#Scene0"));
-                } else if p > 0.40 {
-                    parent.spawn_scene(ass.load("tree0.glb#Scene0"));
-                } else {
-                    parent.spawn_scene(ass.load("tree1.glb#Scene0"));
-                }
-            });
-        }
-        else {
-        commands
-            .spawn_bundle((
-                Transform::from_xyz(
-                    vertices[i].x as f32 - size / 2.,
-                    vertices[i].y as f32,
-                    vertices[i].z as f32 - size / 2.,
-                ),
-                GlobalTransform::identity(),
-            ))
-            .with_children(|parent| {
-                if p > 0.80 {
-                    parent.spawn_scene(ass.load("bush0.glb#Scene0"));
-                } else if p > 0.60 {
-                    parent.spawn_scene(ass.load("bush1.glb#Scene0"));
-                } else if p > 0.40 {
-                    parent.spawn_scene(ass.load("tree0.glb#Scene0"));
-                } else {
-                    parent.spawn_scene(ass.load("tree1.glb#Scene0"));
-                }
-            });
+                })
+                .insert_bundle(ColliderBundle {
+                    shape: ColliderShape::cuboid(0.3, 2., 0.3).into(),
+                    flags: ColliderFlags {
+                        collision_groups: InteractionGroups::all(),
+                        ..ColliderFlags::default()
+                    }
+                    .into(),
+                    ..Default::default()
+                })
+                .with_children(|parent| {
+                    if p > 0.80 {
+                        parent.spawn_scene(ass.load("models/trees/bush0.glb#Scene0"));
+                    } else if p > 0.60 {
+                        parent.spawn_scene(ass.load("models/trees/bush1.glb#Scene0"));
+                    } else if p > 0.40 {
+                        parent.spawn_scene(ass.load("models/trees/tree0.glb#Scene0"));
+                    } else {
+                        parent.spawn_scene(ass.load("models/trees/tree1.glb#Scene0"));
+                    }
+                });
+        } else {
+            commands
+                .spawn_bundle((
+                    Transform::from_xyz(
+                        vertices[i].x as f32 - size / 2.,
+                        vertices[i].y as f32,
+                        vertices[i].z as f32 - size / 2.,
+                    ),
+                    GlobalTransform::identity(),
+                ))
+                .with_children(|parent| {
+                    if p > 0.80 {
+                        parent.spawn_scene(ass.load("models/trees/bush0.glb#Scene0"));
+                    } else if p > 0.60 {
+                        parent.spawn_scene(ass.load("models/trees/bush1.glb#Scene0"));
+                    } else if p > 0.40 {
+                        parent.spawn_scene(ass.load("models/trees/tree0.glb#Scene0"));
+                    } else {
+                        parent.spawn_scene(ass.load("models/trees/tree1.glb#Scene0"));
+                    }
+                });
         }
     }
 

@@ -21,13 +21,13 @@ pub fn setup(
     commands.spawn_bundle(PointLightBundle {
         point_light: PointLight {
             intensity: 50_000.0,
-            range: 60.0,
+            range: 100.0,
             shadows_enabled: true,
             shadow_depth_bias: 1.,
             shadow_normal_bias: 1.,
             ..Default::default()
         },
-        transform: Transform::from_xyz(0., 20.0, 0.),
+        transform: Transform::from_xyz(0., 50.0, 0.),
         ..Default::default()
     });
 }

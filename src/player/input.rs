@@ -63,20 +63,24 @@ pub fn player_input_system(
             if keyboard_input.pressed(input_map.key_down) {
                 player_input.movement.y -= 1.;
             }
+        } else {
+            if key_input.pressed(input_map.key_jump) {
+                player_input.jump = true;
+                // player_input.movement.y = 1.;
+            }
+            // else {
+            //     player_input.movement.y = -1.;
+            // }
         }
 
         if player_input.movement.length_squared() != 0.0 {
             player_input.movement = player_input.movement.normalize();
         }
 
-        if player_input.sprint {
-            player_input.sprint = false;
-        }
         if key_input.pressed(input_map.key_sprint) {
             player_input.sprint = true;
-        }
-        if key_input.pressed(input_map.key_jump) {
-            player_input.jump = true;
+        } else {
+            player_input.sprint = false;
         }
         if key_input.just_pressed(input_map.key_fly) {
             player_input.fly = !player_input.fly;
