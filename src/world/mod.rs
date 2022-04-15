@@ -10,7 +10,7 @@ impl Plugin for WorldPlugin {
         app.insert_resource(ClearColor(Color::hex("87ceeb").unwrap()));
         app.insert_resource(AmbientLight {
             color: Color::rgb(0.2, 0.5, 0.5),
-            brightness: 0.5,
+            brightness: 1.0,
         });
 
         app.add_startup_system(sun::setup);

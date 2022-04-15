@@ -5,14 +5,15 @@ use bevy::{
     DefaultPlugins,
 };
 use bevy_rapier3d::{
+    na::Point3,
     physics::wrapper::{
         ColliderMassPropsComponent, ColliderMaterialComponent, RigidBodyMassPropsComponent,
     },
     prelude::{
-        CoefficientCombineRule, ColliderBundle, ColliderMassProps, ColliderMaterial,
-        ColliderPositionSync, ColliderShape, Isometry, NoUserData, Point, RapierPhysicsPlugin,
-        Real, RigidBodyBundle, RigidBodyForces, RigidBodyMassProps, RigidBodyMassPropsFlags,
-        RigidBodyPosition, RigidBodyPositionSync, RigidBodyType,
+        CoefficientCombineRule, ColliderBundle, ColliderFlags, ColliderMassProps, ColliderMaterial,
+        ColliderPositionSync, ColliderShape, InteractionGroups, Isometry, NoUserData, Point,
+        RapierPhysicsPlugin, Real, RigidBodyBundle, RigidBodyForces, RigidBodyMassProps,
+        RigidBodyMassPropsFlags, RigidBodyPosition, RigidBodyPositionSync, RigidBodyType,
     },
     render::RapierRenderPlugin,
 };
@@ -28,6 +29,7 @@ mod world;
 pub struct MapSettings {
     size: f32,
     plants: u32,
+    plant_dominance_offset: f32,
     plants_colider: bool,
 }
 
@@ -36,6 +38,7 @@ impl Default for MapSettings {
         Self {
             size: 200.,
             plants: 500,
+            plant_dominance_offset: 0.,
             plants_colider: true,
         }
     }
@@ -58,8 +61,8 @@ fn main() {
         // .add_plugin(FlyCam)
         .add_plugin(PlayerPlugin)
         .add_plugin(world::WorldPlugin)
-        // .add_plugin(CubePlugin)
-        // .add_plugin(BallsPlugin)
+        .add_plugin(CubePlugin)
+        .add_plugin(FruitsPlugin)
         .run();
 }
 
@@ -101,8 +104,8 @@ fn generate_cube(
         .insert(ColliderPositionSync::Discrete);
 }
 
-pub struct BallsPlugin;
-impl Plugin for BallsPlugin {
+pub struct FruitsPlugin;
+impl Plugin for FruitsPlugin {
     fn build(&self, app: &mut App) {
         app.add_startup_system(generate_balls);
     }
@@ -112,34 +115,30 @@ fn generate_balls(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    ass: Res<AssetServer>,
 ) {
-    let radius = 0.15;
+    let radius = 0.2;
 
     for y in (-100..=100).step_by(20) {
         for x in (-100..=100).step_by(20) {
-            let x01 = (x + 5) as f32 / 10.0;
-            let y01 = (y + 2) as f32 / 4.0;
-            // sphere
             commands
-                .spawn_bundle(PbrBundle {
-                    mesh: meshes.add(Mesh::from(shape::Icosphere {
-                        radius: radius,
-                        subdivisions: 32,
-                    })),
-                    material: materials.add(StandardMaterial {
-                        base_color: Color::hex("FBCEB1").unwrap(),
-                        // base_color: Color::hex("ff9191").unwrap(),
-                        // vary key PBR parameters on a grid of spheres to show the effect
-                        // metallic: y01,
-                        // perceptual_roughness: x01,
-                        ..Default::default()
-                    }),
-                    ..Default::default()
-                })
+                .spawn_bundle((
+                    Transform::from_xyz(x as f32, 10., y as f32),
+                    GlobalTransform::identity(),
+                ))
+                // .insert_bundle(PointLightBundle {
+                //     point_light: PointLight {
+                //         intensity: 10.0, 
+                //         color: Color::ORANGE,
+                //         shadows_enabled: false,
+                //         ..Default::default()
+                //     },
+                //     ..Default::default()
+                // })
                 .insert_bundle(RigidBodyBundle {
                     position: RigidBodyPosition {
                         position: Isometry::new(
-                            Vec3::new(x as f32, 5.0, y as f32).into(),
+                            Vec3::new(x as f32, 10., y as f32).into(),
                             Vec3::new(0., 0., 0.).into(),
                         ),
                         ..Default::default()
@@ -148,11 +147,26 @@ fn generate_balls(
                     ..Default::default()
                 })
                 .insert_bundle(ColliderBundle {
-                    shape: ColliderShape::ball(radius).into(),
+                    // shape: ColliderShape::ball(radius).into(),
+                    // shape: ColliderShape::cuboid(radius, radius, radius).into(),
+                    shape: ColliderShape::capsule(
+                        Point3::new(0.0, -0.1, 0.0),
+                        Point3::new(0.0, 0.1, 0.0),
+                        radius,
+                    )
+                    .into(),
+                    flags: ColliderFlags {
+                        collision_groups: InteractionGroups::all(),
+                        ..ColliderFlags::default()
+                    }
+                    .into(),
+                    material: ColliderMaterial::new(1., 0.1).into(),
                     ..Default::default()
                 })
-                .insert(Transform::default())
-                .insert(ColliderPositionSync::Discrete);
+                .insert(ColliderPositionSync::Discrete)
+                .with_children(|parent| {
+                    parent.spawn_scene(ass.load("models/fruits/tangerine.glb#Scene0"));
+                });
         }
     }
 }

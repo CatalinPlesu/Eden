@@ -40,7 +40,7 @@ pub fn generate_terrain(
     vals.dedup();
 
     for i in vals {
-        let p: f64 = rng.gen();
+        let p: f32 = rng.gen::<f32>() + map_settings.plant_dominance_offset;
         if map_settings.plants_colider {
             commands
                 .spawn_bundle((
@@ -77,11 +77,11 @@ pub fn generate_terrain(
                     ..Default::default()
                 })
                 .with_children(|parent| {
-                    if p > 0.80 {
+                    if p > 0.75 {
                         parent.spawn_scene(ass.load("models/trees/bush0.glb#Scene0"));
-                    } else if p > 0.60 {
+                    } else if p > 0.50 {
                         parent.spawn_scene(ass.load("models/trees/bush1.glb#Scene0"));
-                    } else if p > 0.40 {
+                    } else if p > 0.25 {
                         parent.spawn_scene(ass.load("models/trees/tree0.glb#Scene0"));
                     } else {
                         parent.spawn_scene(ass.load("models/trees/tree1.glb#Scene0"));
@@ -98,11 +98,11 @@ pub fn generate_terrain(
                     GlobalTransform::identity(),
                 ))
                 .with_children(|parent| {
-                    if p > 0.80 {
+                    if p > 0.75 {
                         parent.spawn_scene(ass.load("models/trees/bush0.glb#Scene0"));
-                    } else if p > 0.60 {
+                    } else if p > 0.50 {
                         parent.spawn_scene(ass.load("models/trees/bush1.glb#Scene0"));
-                    } else if p > 0.40 {
+                    } else if p > 0.25 {
                         parent.spawn_scene(ass.load("models/trees/tree0.glb#Scene0"));
                     } else {
                         parent.spawn_scene(ass.load("models/trees/tree1.glb#Scene0"));
