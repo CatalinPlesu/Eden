@@ -16,9 +16,9 @@ pub fn generate_terrain(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     ass: Res<AssetServer>,
-    map_settings: Res<MapSettings>,
+    world_settings: Res<WorldSettings>,
 ) {
-    let size = map_settings.size.clone();
+    let size = world_settings.size.clone();
 
     let mesh_collider = create_mesh(size as u32, -1., 5.);
 
@@ -33,15 +33,15 @@ pub fn generate_terrain(
         },
     };
     let mut rng = rand::thread_rng();
-    let mut vals: Vec<usize> = (0..map_settings.plants)
+    let mut vals: Vec<usize> = (0..world_settings.plants)
         .map(|_| rng.gen_range(0, vertices.len()))
         .collect();
     vals.sort();
     vals.dedup();
 
     for i in vals {
-        let p: f32 = rng.gen::<f32>() + map_settings.plant_dominance_offset;
-        if map_settings.plants_colider {
+        let p: f32 = rng.gen::<f32>() + world_settings.plant_dominance_offset;
+        if world_settings.plants_colider {
             commands
                 .spawn_bundle((
                     Transform::from_xyz(
@@ -69,11 +69,11 @@ pub fn generate_terrain(
                 })
                 .insert_bundle(ColliderBundle {
                     shape: ColliderShape::cuboid(0.3, 2., 0.3).into(),
-                    flags: ColliderFlags {
-                        collision_groups: InteractionGroups::all(),
-                        ..ColliderFlags::default()
-                    }
-                    .into(),
+                    // flags: ColliderFlags {
+                    //     collision_groups: InteractionGroups::all(),
+                    //     ..ColliderFlags::default()
+                    // }
+                    // .into(),
                     ..Default::default()
                 })
                 .with_children(|parent| {
@@ -136,6 +136,11 @@ pub fn generate_terrain(
             shape: mesh_collider.1.into(),
             position: Isometry::new(Vec3::new(0., 0., 0.).into(), Vec3::new(0., 0., 0.).into())
                 .into(),
+            flags: ColliderFlags {
+                collision_groups: InteractionGroups::all(),
+                ..ColliderFlags::default()
+            }
+            .into(),
             ..Default::default()
         });
 

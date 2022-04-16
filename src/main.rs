@@ -1,5 +1,6 @@
 use bevy::{
     app::{App, CoreStage, Plugin},
+    diagnostic::FrameTimeDiagnosticsPlugin,
     pbr::wireframe::{Wireframe, WireframeConfig, WireframePlugin},
     prelude::*,
     DefaultPlugins,
@@ -19,27 +20,30 @@ use bevy_rapier3d::{
 };
 
 use bevy_flycam::PlayerPlugin as FlyCam;
-
 use core::f32::consts::PI;
+use rand::prelude::*;
 
 use player::*;
 mod player;
+mod ui;
 mod world;
 
-pub struct MapSettings {
+pub struct WorldSettings {
     size: f32,
     plants: u32,
     plant_dominance_offset: f32,
     plants_colider: bool,
+    fruits: i32,
 }
 
-impl Default for MapSettings {
+impl Default for WorldSettings {
     fn default() -> Self {
         Self {
             size: 200.,
-            plants: 500,
+            plants: 300,
             plant_dominance_offset: 0.,
             plants_colider: true,
+            fruits: 100,
         }
     }
 }
@@ -51,8 +55,9 @@ fn main() {
             ..Default::default()
         })
         .insert_resource(Msaa { samples: 4 })
-        .insert_resource(MapSettings::default())
+        .insert_resource(WorldSettings::default())
         .add_plugins(DefaultPlugins)
+        .add_plugin(FrameTimeDiagnosticsPlugin::default())
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
         .add_plugin(RapierRenderPlugin)
         .add_plugin(WireframePlugin)
@@ -63,6 +68,7 @@ fn main() {
         .add_plugin(world::WorldPlugin)
         .add_plugin(CubePlugin)
         .add_plugin(FruitsPlugin)
+        .add_plugin(ui::UserInterfacePlugin)
         .run();
 }
 
@@ -115,58 +121,63 @@ fn generate_balls(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    world_settings: Res<WorldSettings>,
     ass: Res<AssetServer>,
 ) {
     let radius = 0.2;
 
-    for y in (-100..=100).step_by(20) {
-        for x in (-100..=100).step_by(20) {
-            commands
-                .spawn_bundle((
-                    Transform::from_xyz(x as f32, 10., y as f32),
-                    GlobalTransform::identity(),
-                ))
-                // .insert_bundle(PointLightBundle {
-                //     point_light: PointLight {
-                //         intensity: 10.0, 
-                //         color: Color::ORANGE,
-                //         shadows_enabled: false,
-                //         ..Default::default()
-                //     },
-                //     ..Default::default()
-                // })
-                .insert_bundle(RigidBodyBundle {
-                    position: RigidBodyPosition {
-                        position: Isometry::new(
-                            Vec3::new(x as f32, 10., y as f32).into(),
-                            Vec3::new(0., 0., 0.).into(),
-                        ),
-                        ..Default::default()
-                    }
-                    .into(),
+    let mut rng = rand::thread_rng();
+    let half_size = world_settings.size / 2.1;
+    for _ in 0..world_settings.fruits {
+        let x = rng.gen_range(-half_size, half_size);
+        let y = rng.gen_range(-half_size, half_size);
+
+        commands
+            .spawn_bundle((
+                Transform::from_xyz(x, 10., y),
+                GlobalTransform::identity(),
+            ))
+            // .insert_bundle(PointLightBundle {
+            //     point_light: PointLight {
+            //         intensity: 10.0,
+            //         color: Color::ORANGE,
+            //         shadows_enabled: false,
+            //         ..Default::default()
+            //     },
+            //     ..Default::default()
+            // })
+            .insert_bundle(RigidBodyBundle {
+                position: RigidBodyPosition {
+                    position: Isometry::new(
+                        Vec3::new(x, 10., y).into(),
+                        Vec3::new(0., 0., 0.).into(),
+                    ),
                     ..Default::default()
-                })
-                .insert_bundle(ColliderBundle {
-                    // shape: ColliderShape::ball(radius).into(),
-                    // shape: ColliderShape::cuboid(radius, radius, radius).into(),
-                    shape: ColliderShape::capsule(
-                        Point3::new(0.0, -0.1, 0.0),
-                        Point3::new(0.0, 0.1, 0.0),
-                        radius,
-                    )
-                    .into(),
-                    flags: ColliderFlags {
-                        collision_groups: InteractionGroups::all(),
-                        ..ColliderFlags::default()
-                    }
-                    .into(),
-                    material: ColliderMaterial::new(1., 0.1).into(),
-                    ..Default::default()
-                })
-                .insert(ColliderPositionSync::Discrete)
-                .with_children(|parent| {
-                    parent.spawn_scene(ass.load("models/fruits/tangerine.glb#Scene0"));
-                });
-        }
+                }
+                .into(),
+                ..Default::default()
+            })
+            .insert_bundle(ColliderBundle {
+                // shape: ColliderShape::ball(radius).into(),
+                // shape: ColliderShape::cuboid(radius, radius, radius).into(),
+                shape: ColliderShape::capsule(
+                    Point3::new(0.0, -0.1, 0.0),
+                    Point3::new(0.0, 0.1, 0.0),
+                    radius,
+                )
+                .into(),
+                // flags: ColliderFlags {
+                //     collision_groups: InteractionGroups::all(),
+                //     ..ColliderFlags::default()
+                // }
+                // .into(),
+                material: ColliderMaterial::new(1., 0.1).into(),
+                ..Default::default()
+            })
+            .insert(ColliderPositionSync::Discrete)
+            .with_children(|parent| {
+                parent.spawn_scene(ass.load("models/fruits/tangerine.glb#Scene0"));
+            });
     }
+
 }
