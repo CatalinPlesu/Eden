@@ -28,6 +28,9 @@ mod player;
 mod ui;
 mod world;
 
+pub const RAPIER_PLAYER_GROUP: u32 = 1;
+pub const RAPIER_TANGERINE_GROUP: u32 = 333;
+
 pub struct WorldSettings {
     size: f32,
     plants: u32,
@@ -48,6 +51,36 @@ impl Default for WorldSettings {
     }
 }
 
+pub struct Score {
+    value: i32,
+}
+impl Default for Score {
+    fn default() -> Self {
+        Self { value: 0 }
+    }
+}
+
+#[derive(PartialEq)]
+pub enum GameState {
+    Running,
+    Finished,
+}
+
+pub struct Game {
+    state: GameState,
+}
+
+impl Default for Game {
+    fn default() -> Self {
+        Self {
+            state: GameState::Running,
+        }
+    }
+}
+
+#[derive(Debug, Component)]
+pub struct Tangerine;
+
 fn main() {
     App::new()
         .insert_resource(WindowDescriptor {
@@ -56,6 +89,8 @@ fn main() {
         })
         .insert_resource(Msaa { samples: 4 })
         .insert_resource(WorldSettings::default())
+        .insert_resource(Score::default())
+        .insert_resource(Game::default())
         .add_plugins(DefaultPlugins)
         .add_plugin(FrameTimeDiagnosticsPlugin::default())
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
@@ -104,6 +139,11 @@ fn generate_cube(
         })
         .insert_bundle(ColliderBundle {
             shape: ColliderShape::cuboid(0.5, 0.5, 0.5).into(),
+            flags: ColliderFlags {
+                collision_groups: InteractionGroups::all().with_memberships(RAPIER_TANGERINE_GROUP),
+                ..Default::default()
+            }
+            .into(),
             ..Default::default()
         })
         .insert(Transform::default())
@@ -114,6 +154,7 @@ pub struct FruitsPlugin;
 impl Plugin for FruitsPlugin {
     fn build(&self, app: &mut App) {
         app.add_startup_system(generate_balls);
+        app.add_system(tangerine_detection);
     }
 }
 
@@ -133,10 +174,8 @@ fn generate_balls(
         let y = rng.gen_range(-half_size, half_size);
 
         commands
-            .spawn_bundle((
-                Transform::from_xyz(x, 10., y),
-                GlobalTransform::identity(),
-            ))
+            .spawn_bundle((Transform::from_xyz(x, 10., y), GlobalTransform::identity()))
+            .insert(Tangerine)
             // .insert_bundle(PointLightBundle {
             //     point_light: PointLight {
             //         intensity: 10.0,
@@ -179,5 +218,30 @@ fn generate_balls(
                 parent.spawn_scene(ass.load("models/fruits/tangerine.glb#Scene0"));
             });
     }
+}
 
+pub fn tangerine_detection(
+    mut commands: Commands,
+    mut score: ResMut<Score>,
+    mut camera_query: Query<&Transform, With<PerspectiveProjection>>,
+    mut tangerines: Query<(Entity, &Transform, With<Tangerine>)>,
+) {
+    let radius = 2.5;
+    let mut rng = rand::thread_rng();
+
+    for transform in camera_query.iter_mut() {
+        // println!("{:?}", transform.translation);
+        // println!();
+        for (tangerine, t_transform, wtf) in tangerines.iter_mut() {
+            if (transform.translation.x - t_transform.translation.x).abs() < radius
+                && (transform.translation.y - t_transform.translation.y).abs() < radius
+                && (transform.translation.z - t_transform.translation.z).abs() < radius
+            {
+                // println!("{:?}", t_transform.translation);
+                commands.entity(tangerine).despawn_recursive();
+                score.value += rng.gen_range(0, 100);
+            }
+            // commands.entity(tangerine).despawn_recursive();
+        }
+    }
 }

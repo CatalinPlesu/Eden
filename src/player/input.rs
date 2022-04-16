@@ -26,6 +26,7 @@ pub fn player_input_system(
     mut mouse_events: EventReader<MouseMotion>,
     keyboard_input: Res<Input<KeyCode>>,
     mut query: Query<&mut PlayerController>,
+    game: Res<Game>,
 ) {
     for mut player_input in query.iter_mut() {
         let window = windows.get_primary_mut().unwrap();
@@ -40,50 +41,52 @@ pub fn player_input_system(
                 .clamp(-FRAC_PI_2 + 0.001953125, FRAC_PI_2 - 0.001953125);
             player_input.yaw = player_input.yaw - mouse_delta.x;
         }
-
         player_input.movement = Vec3::ZERO;
 
-        if keyboard_input.pressed(input_map.key_forward) {
-            player_input.movement.z += 1.;
-        }
-        if keyboard_input.pressed(input_map.key_back) {
-            player_input.movement.z -= 1.;
-        }
-        if keyboard_input.pressed(input_map.key_right) {
-            player_input.movement.x += 1.;
-        }
-        if keyboard_input.pressed(input_map.key_left) {
-            player_input.movement.x -= 1.;
-        }
+        if game.state == GameState::Running {
 
-        if player_input.fly {
-            if keyboard_input.pressed(input_map.key_up) {
-                player_input.movement.y += 1.;
+            if keyboard_input.pressed(input_map.key_forward) {
+                player_input.movement.z += 1.;
             }
-            if keyboard_input.pressed(input_map.key_down) {
-                player_input.movement.y -= 1.;
+            if keyboard_input.pressed(input_map.key_back) {
+                player_input.movement.z -= 1.;
             }
-        } else {
-            if key_input.pressed(input_map.key_jump) {
-                player_input.jump = true;
-                // player_input.movement.y = 1.;
+            if keyboard_input.pressed(input_map.key_right) {
+                player_input.movement.x += 1.;
             }
-            // else {
-            //     player_input.movement.y = -1.;
-            // }
-        }
+            if keyboard_input.pressed(input_map.key_left) {
+                player_input.movement.x -= 1.;
+            }
 
-        if player_input.movement.length_squared() != 0.0 {
-            player_input.movement = player_input.movement.normalize();
-        }
+            if player_input.fly {
+                if keyboard_input.pressed(input_map.key_up) {
+                    player_input.movement.y += 1.;
+                }
+                if keyboard_input.pressed(input_map.key_down) {
+                    player_input.movement.y -= 1.;
+                }
+            } else {
+                if key_input.pressed(input_map.key_jump) {
+                    player_input.jump = true;
+                    // player_input.movement.y = 1.;
+                }
+                // else {
+                //     player_input.movement.y = -1.;
+                // }
+            }
 
-        if key_input.pressed(input_map.key_sprint) {
-            player_input.sprint = true;
-        } else {
-            player_input.sprint = false;
-        }
-        if key_input.just_pressed(input_map.key_fly) {
-            player_input.fly = !player_input.fly;
+            if player_input.movement.length_squared() != 0.0 {
+                player_input.movement = player_input.movement.normalize();
+            }
+
+            if key_input.pressed(input_map.key_sprint) {
+                player_input.sprint = true;
+            } else {
+                player_input.sprint = false;
+            }
+            if key_input.just_pressed(input_map.key_fly) {
+                player_input.fly = !player_input.fly;
+            }
         }
     }
 }

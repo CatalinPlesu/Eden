@@ -1,3 +1,4 @@
+use crate::*;
 use bevy::text::Font;
 use bevy::{app::Plugin, prelude::*};
 use bevy::{
@@ -20,9 +21,10 @@ impl Plugin for UserInterfacePlugin {
     fn build(&self, app: &mut App) {
         app.add_startup_system(setup)
             .add_system(fps_update_system)
+            .add_system(score_update_system)
             .init_resource::<Countdown>()
-            .add_system(time_update_system);
-        // .add_system(text_color_system);
+            .add_system(time_update_system)
+            .add_system(text_color_system);
     }
 }
 
@@ -34,6 +36,9 @@ struct TimeText;
 
 #[derive(Component)]
 struct ScoreText;
+
+#[derive(Component)]
+struct ColorText;
 
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn_bundle(UiCameraBundle::default());
@@ -152,15 +157,13 @@ fn fps_update_system(diagnostics: Res<Diagnostics>, mut query: Query<&mut Text, 
 }
 
 pub struct Countdown {
-    pub percent_trigger: Timer,
-    pub main_timer: Timer,
+    pub timer: Timer,
 }
 
 impl Countdown {
     pub fn new() -> Self {
         Self {
-            percent_trigger: Timer::from_seconds(1.0, true),
-            main_timer: Timer::from_seconds(60.0, false),
+            timer: Timer::from_seconds(60.0, false),
         }
     }
 }
@@ -171,41 +174,72 @@ impl Default for Countdown {
     }
 }
 
-fn countdown(time: Res<Time>, mut countdown: ResMut<Countdown>) {
-    countdown.main_timer.tick(time.delta());
-
-    if countdown.percent_trigger.tick(time.delta()).just_finished() {
-        if !countdown.main_timer.finished() {
-            println!(
-                "Timer is {:0.0}% complete!",
-                countdown.main_timer.percent() * 100.0
-            );
-            println!(
-                "Timer is {:?} complete!",
-                countdown.main_timer.elapsed().as_secs()
+fn time_update_system(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    time: Res<Time>,
+    mut countdown: ResMut<Countdown>,
+    mut query: Query<&mut Text, With<TimeText>>,
+    mut game: ResMut<Game>,
+) {
+    countdown.timer.tick(time.delta());
+    for mut text in query.iter_mut() {
+        if !countdown.timer.finished() {
+            text.sections[1].value = format!(
+                "{}",
+                (countdown.timer.duration() - countdown.timer.elapsed()).as_secs()
             );
         } else {
-            countdown.percent_trigger.pause();
-            println!("Paused percent trigger timer");
+            text.sections[1].value = format!("{}", -1);
+            game.state = GameState::Finished;
+
+            commands
+                .spawn_bundle(TextBundle {
+                    style: Style {
+                        align_self: AlignSelf::FlexEnd,
+                        position_type: PositionType::Absolute,
+                        position: Rect {
+                            top: Val::Px(50.),
+                            left: Val::Px(50.),
+                            ..Default::default()
+                        },
+                        ..Default::default()
+                    },
+                    text: Text::with_section(
+                        "END!",
+                        TextStyle {
+                            font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                            font_size: 100.0,
+                            color: Color::WHITE,
+                        },
+                        TextAlignment {
+                            horizontal: HorizontalAlign::Center,
+                            ..Default::default()
+                        },
+                    ),
+                    ..Default::default()
+                })
+                .insert(ColorText);
         }
     }
 }
 
-fn time_update_system(
-    time: Res<Time>,
-    mut countdown: ResMut<Countdown>,
-    mut query: Query<&mut Text, With<TimeText>>,
-) {
-    countdown.main_timer.tick(time.delta());
+fn score_update_system(score: Res<Score>, mut query: Query<&mut Text, With<ScoreText>>) {
     for mut text in query.iter_mut() {
-        if !countdown.main_timer.finished() {
-            text.sections[1].value = format!(
-                "{}",
-                (countdown.main_timer.duration() - countdown.main_timer.elapsed()).as_secs()
-            );
-        } else {
-            countdown.percent_trigger.pause();
-            text.sections[1].value = format!("{}", -1);
-        }
+        text.sections[1].value = format!("{}", score.value);
+    }
+}
+
+fn text_color_system(time: Res<Time>, mut query: Query<&mut Text, With<ColorText>>) {
+    for mut text in query.iter_mut() {
+        let seconds = time.seconds_since_startup() as f32;
+        // We used the `Text::with_section` helper method, but it is still just a `Text`,
+        // so to update it, we are still updating the one and only section
+        text.sections[0].style.color = Color::Rgba {
+            red: (1.25 * seconds).sin() / 2.0 + 0.5,
+            green: (0.75 * seconds).sin() / 2.0 + 0.5,
+            blue: (0.50 * seconds).sin() / 2.0 + 0.5,
+            alpha: 1.0,
+        };
     }
 }
