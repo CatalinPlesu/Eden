@@ -117,6 +117,7 @@ pub fn generate_terrain(
             material: materials.add(StandardMaterial {
                 // base_color: Color::rgb(0.9, 0.5, 0.5).into(),
                 base_color: Color::rgb(0., 0.5, 0.3).into(),
+                // base_color: Color::rgb(194., 178., 128.).into(),
                 normal_map_texture: Some(asset_server.load("grass.jpg").clone()),
                 // alpha_mode: AlphaMode::Blend,
                 // unlit: true,

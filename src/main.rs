@@ -27,6 +27,7 @@ use player::*;
 mod player;
 mod ui;
 mod world;
+mod whale;
 
 pub const RAPIER_PLAYER_GROUP: u32 = 1;
 pub const RAPIER_TANGERINE_GROUP: u32 = 333;
@@ -37,16 +38,18 @@ pub struct WorldSettings {
     plant_dominance_offset: f32,
     plants_colider: bool,
     fruits: i32,
+    whales: u32,
 }
 
 impl Default for WorldSettings {
     fn default() -> Self {
         Self {
             size: 200.,
-            plants: 300,
+            plants: 100,
             plant_dominance_offset: 0.,
             plants_colider: true,
             fruits: 100,
+            whales: 1,
         }
     }
 }
@@ -101,71 +104,29 @@ fn main() {
         // .add_plugin(FlyCam)
         .add_plugin(PlayerPlugin)
         .add_plugin(world::WorldPlugin)
-        .add_plugin(CubePlugin)
         .add_plugin(FruitsPlugin)
         .add_plugin(ui::UserInterfacePlugin)
+        .add_plugin(whale::WhalePlugin)
         .run();
-}
-
-pub struct CubePlugin;
-impl Plugin for CubePlugin {
-    fn build(&self, app: &mut App) {
-        app.add_startup_system(generate_cube);
-    }
-}
-
-fn generate_cube(
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
-) {
-    commands
-        .spawn_bundle(PbrBundle {
-            mesh: meshes.add(Mesh::from(shape::Cube { size: 1.0 })),
-            material: materials.add(Color::rgb(0.9, 0.5, 0.5).into()),
-            ..Default::default()
-        })
-        .insert(Wireframe)
-        .insert_bundle(RigidBodyBundle {
-            position: RigidBodyPosition {
-                position: Isometry::new(
-                    Vec3::new(0.0, 3.0, 0.0).into(),
-                    Vec3::new(PI / 4.0, PI / 4.0, PI / 4.0).into(),
-                ),
-                ..Default::default()
-            }
-            .into(),
-            ..Default::default()
-        })
-        .insert_bundle(ColliderBundle {
-            shape: ColliderShape::cuboid(0.5, 0.5, 0.5).into(),
-            flags: ColliderFlags {
-                collision_groups: InteractionGroups::all().with_memberships(RAPIER_TANGERINE_GROUP),
-                ..Default::default()
-            }
-            .into(),
-            ..Default::default()
-        })
-        .insert(Transform::default())
-        .insert(ColliderPositionSync::Discrete);
 }
 
 pub struct FruitsPlugin;
 impl Plugin for FruitsPlugin {
     fn build(&self, app: &mut App) {
-        app.add_startup_system(generate_balls);
+        app.add_startup_system(spawn_fruits);
         app.add_system(tangerine_detection);
     }
 }
 
-fn generate_balls(
+fn spawn_fruits(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     world_settings: Res<WorldSettings>,
     ass: Res<AssetServer>,
 ) {
-    let radius = 0.2;
+    let scale = 3.;
+    let radius = 0.12 * scale;
 
     let mut rng = rand::thread_rng();
     let half_size = world_settings.size / 2.1;
@@ -174,7 +135,11 @@ fn generate_balls(
         let y = rng.gen_range(-half_size, half_size);
 
         commands
-            .spawn_bundle((Transform::from_xyz(x, 10., y), GlobalTransform::identity()))
+            .spawn_bundle((
+                Transform::from_xyz(x, 10., y).
+                with_scale(Vec3::new(scale, scale, scale)),
+                GlobalTransform::identity(),
+            ))
             .insert(Tangerine)
             // .insert_bundle(PointLightBundle {
             //     point_light: PointLight {
@@ -197,19 +162,12 @@ fn generate_balls(
                 ..Default::default()
             })
             .insert_bundle(ColliderBundle {
-                // shape: ColliderShape::ball(radius).into(),
-                // shape: ColliderShape::cuboid(radius, radius, radius).into(),
                 shape: ColliderShape::capsule(
                     Point3::new(0.0, -0.1, 0.0),
                     Point3::new(0.0, 0.1, 0.0),
                     radius,
                 )
                 .into(),
-                // flags: ColliderFlags {
-                //     collision_groups: InteractionGroups::all(),
-                //     ..ColliderFlags::default()
-                // }
-                // .into(),
                 material: ColliderMaterial::new(1., 0.1).into(),
                 ..Default::default()
             })
@@ -226,7 +184,7 @@ pub fn tangerine_detection(
     mut camera_query: Query<&Transform, With<PerspectiveProjection>>,
     mut tangerines: Query<(Entity, &Transform, With<Tangerine>)>,
 ) {
-    let radius = 2.5;
+    let radius = 2.2;
     let mut rng = rand::thread_rng();
 
     for transform in camera_query.iter_mut() {
