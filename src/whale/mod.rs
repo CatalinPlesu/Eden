@@ -18,6 +18,8 @@ use bevy_rapier3d::prelude::{
 };
 use rand::prelude::*;
 
+const DEBUG: bool = false;
+
 pub struct WhalePlugin;
 
 #[derive(Debug, Component)]
@@ -35,14 +37,37 @@ impl Whale {
             gen_point(bounds),
             gen_point(bounds),
         ];
+        let mut rng = rand::thread_rng();
+        let v = rng.gen_range(10., 20.);
         let distance = distance(&points[0], &points[3]);
-        let velocity = distance / 20.;
+        let velocity = distance / v;
 
         Self {
             timer: Timer::from_seconds(velocity, false),
             point: points,
             bounds: bounds,
         }
+    }
+
+    pub fn reset(&mut self) {
+        let mut rng = rand::thread_rng();
+        let t = rng.gen_range(-1., 0.);
+        let v = rng.gen_range(10., 20.);
+        let points = [
+            self.point[3],
+            Vec3::new(
+                (self.point[2].x - self.point[3].x) * t + self.point[3].x,
+                (self.point[2].y - self.point[3].y) * t + self.point[3].y,
+                (self.point[2].z - self.point[3].z) * t + self.point[3].z,
+            ),
+            gen_point(self.bounds),
+            gen_point(self.bounds),
+        ];
+        let distance = distance(&points[0], &points[3]);
+        let velocity = distance / v;
+
+        self.timer = Timer::from_seconds(velocity, false);
+        self.point = points;
     }
 }
 
@@ -54,7 +79,7 @@ pub fn gen_point(half_size: f32) -> Vec3 {
     let mut rng = rand::thread_rng();
     let x = rng.gen_range(-half_size, half_size);
     let z = rng.gen_range(-half_size, half_size);
-    let y = rng.gen_range(20., f32::max(100., 2. * half_size));
+    let y = rng.gen_range(20., 100.);
     Vec3::new(x, y, z)
 }
 
@@ -95,20 +120,22 @@ fn whale_move_system(
 
             let p = quadratic_bezier_curve(&t, &whale.point);
 
-            commands.spawn_bundle(PbrBundle {
-                mesh: meshes.add(Mesh::from(shape::Icosphere {
-                    radius: 0.45,
-                    subdivisions: 32,
-                })),
-                material: materials.add(StandardMaterial {
-                    base_color: Color::rgb(0.2, 0.2, 0.8),
-                    metallic: 0.5,
-                    perceptual_roughness: 0.5,
+            if DEBUG {
+                commands.spawn_bundle(PbrBundle {
+                    mesh: meshes.add(Mesh::from(shape::Icosphere {
+                        radius: 0.45,
+                        subdivisions: 32,
+                    })),
+                    material: materials.add(StandardMaterial {
+                        base_color: Color::rgb(0.2, 0.2, 0.8),
+                        metallic: 0.5,
+                        perceptual_roughness: 0.5,
+                        ..Default::default()
+                    }),
+                    transform: Transform::from_translation(p),
                     ..Default::default()
-                }),
-                transform: Transform::from_translation(p),
-                ..Default::default()
-            });
+                });
+            }
 
             transform.translation = p;
 
@@ -118,9 +145,10 @@ fn whale_move_system(
             transform.rotation =
                 Quat::from_euler(EulerRot::ZYX, 0.0, std::f32::consts::PI + yaw, pitch);
         } else {
-            let new_whale = Whale::new(whale.bounds, whale.point[3]);
-            whale.timer = new_whale.timer;
-            whale.point = new_whale.point;
+            // let new_whale = Whale::new(whale.bounds, whale.point[3]);
+            // whale.timer = new_whale.timer;
+            // whale.point = new_whale.point;
+            whale.reset();
         }
     }
 }
@@ -136,38 +164,38 @@ fn setup(
     let mut rng = rand::thread_rng();
 
     for _ in 0..world_settings.whales {
-        // let start = gen_point(half_size);
-        let start = Vec3::new(0., 10., 0.);
+        let start = gen_point(half_size);
         let scale = rng.gen_range(5., 10.);
         let whale = Whale::new(half_size, start);
 
-        let color = [
-            Color::hex("355C7D").unwrap(),
-            Color::hex("A8A7A7").unwrap(),
-            Color::hex("E1F5C4").unwrap(),
-            Color::hex("F67280").unwrap(),
-        ];
-        for (i, vec3) in whale.point.iter().enumerate() {
-            commands.spawn_bundle(PbrBundle {
-                mesh: meshes.add(Mesh::from(shape::Icosphere {
-                    radius: 5.,
-                    subdivisions: 32,
-                })),
-                material: materials.add(StandardMaterial {
-                    base_color: color[i],
-                    metallic: 0.5,
-                    perceptual_roughness: 0.5,
+        if DEBUG {
+            let color = [
+                Color::hex("355C7D").unwrap(),
+                Color::hex("A8A7A7").unwrap(),
+                Color::hex("E1F5C4").unwrap(),
+                Color::hex("F67280").unwrap(),
+            ];
+            for (i, vec3) in whale.point.iter().enumerate() {
+                commands.spawn_bundle(PbrBundle {
+                    mesh: meshes.add(Mesh::from(shape::Icosphere {
+                        radius: 5.,
+                        subdivisions: 32,
+                    })),
+                    material: materials.add(StandardMaterial {
+                        base_color: color[i],
+                        metallic: 0.5,
+                        perceptual_roughness: 0.5,
+                        ..Default::default()
+                    }),
+                    transform: Transform::from_translation(*vec3),
                     ..Default::default()
-                }),
-                transform: Transform::from_translation(*vec3),
-                ..Default::default()
-            });
+                });
+            }
         }
 
         let direction = (whale.point[3] - whale.point[0]).normalize();
         let yaw = f32::atan2(direction.x, direction.z);
         let pitch = f32::asin(direction.y);
-        println!("{:?}", (yaw, pitch));
 
         commands
             .spawn_bundle((

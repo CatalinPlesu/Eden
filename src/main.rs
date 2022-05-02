@@ -49,7 +49,7 @@ impl Default for WorldSettings {
             plant_dominance_offset: 0.,
             plants_colider: true,
             fruits: 100,
-            whales: 1,
+            whales: 5,
         }
     }
 }
