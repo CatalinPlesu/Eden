@@ -38,6 +38,7 @@ pub struct WorldSettings {
     plant_dominance_offset: f32,
     plants_colider: bool,
     fruits: i32,
+    fruits_limit: i32,
     whales: u32,
 }
 
@@ -48,8 +49,9 @@ impl Default for WorldSettings {
             plants: 100,
             plant_dominance_offset: 0.,
             plants_colider: true,
-            fruits: 100,
-            whales: 5,
+            fruits: 50,
+            fruits_limit: 100,
+            whales: 1,
         }
     }
 }
@@ -105,7 +107,7 @@ fn main() {
         .add_plugin(PlayerPlugin)
         .add_plugin(world::WorldPlugin)
         .add_plugin(FruitsPlugin)
-        .add_plugin(ui::UserInterfacePlugin)
+        // .add_plugin(ui::UserInterfacePlugin)
         .add_plugin(whale::WhalePlugin)
         .run();
 }
@@ -183,6 +185,7 @@ pub fn tangerine_detection(
     mut score: ResMut<Score>,
     mut camera_query: Query<&Transform, With<PerspectiveProjection>>,
     mut tangerines: Query<(Entity, &Transform, With<Tangerine>)>,
+    mut world_settings: ResMut<WorldSettings>,
 ) {
     let radius = 2.2;
     let mut rng = rand::thread_rng();
@@ -198,6 +201,7 @@ pub fn tangerine_detection(
                 // println!("{:?}", t_transform.translation);
                 commands.entity(tangerine).despawn_recursive();
                 score.value += rng.gen_range(0, 100);
+                world_settings.fruits -= 1;
             }
             // commands.entity(tangerine).despawn_recursive();
         }
